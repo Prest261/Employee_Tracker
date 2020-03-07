@@ -176,7 +176,12 @@ function addRole() {
     });
 }
 
-function viewEmployee() {}
+function viewEmployee() {
+    connection.query('SELECT * FROM employee', function(err, db) {
+        console.table(db);
+        start();
+    });
+}
 
 function viewDepart() {
     connection.query('SELECT * FROM department', function(err, db) {
