@@ -34,7 +34,8 @@ function start() {
                 'Add Role',
                 'View all Employees',
                 'View Department',
-                'View all Employees by Manager',
+                'View Role',
+                'View all Employees by Role',
                 'Update Employee Role',
                 'Update Employee Manager',
                 'Remove Employee'
@@ -146,7 +147,12 @@ function viewDepart() {
     });
 }
 
-function viewEmpRole() {}
+function viewEmpRole() {
+    connection.query('SELECT * FROM role', function(err, db) {
+        console.table(db);
+        start();
+    });
+}
 
 function viewRole() {}
 
