@@ -2,7 +2,7 @@
 var mysql = require('mysql');
 var inquirer = require('inquirer');
 require('console.table');
-console.log('my app');
+// console.log('my app');
 // create connection to sql database
 var connection = mysql.createConnection({
     host: 'localhost',
@@ -17,12 +17,12 @@ var connection = mysql.createConnection({
 
 connection.connect((err) => {
     if (err) throw err;
-    console.log('connection');
+    // console.log('connection');
     start();
 });
 
 function start() {
-    console.log('start');
+    // console.log('start');
     inquirer
         .prompt({
             name: 'action',
@@ -77,7 +77,45 @@ function start() {
         });
 }
 
-function addEmployee() {}
+function addEmployee() {
+    connection.query('SELECT * FROM role', function(error, db) {
+        var roleChoices = db.map((e) => {
+            return {
+                name: e.title,
+                value: e.id
+            };
+        });
+        inquirer
+            .prompt([{
+                    name: 'first_name',
+                    type: 'input',
+                    message: 'What is the first name of the employee?'
+                },
+                {
+                    name: 'last_name',
+                    type: 'input',
+                    message: 'What is the last name of the employee?'
+                },
+                {
+                    name: 'role_id',
+                    type: 'list',
+                    message: 'What is the employee role?',
+                    choices: roleChoices
+                }
+            ])
+            .then((answer) => {
+                connection.query('INSERT INTO employee SET ?', answer, function(
+                    error,
+                    db
+                ) {
+                    console.log(error);
+                    console.log(db);
+                    console.log('employee created');
+                    start();
+                });
+            });
+    });
+}
 
 function addDepartment() {
     inquirer
