@@ -38,7 +38,8 @@ function start() {
                 'View all Employees by Role',
                 'Update Employee Role',
                 'Update Employee Manager',
-                'Remove Employee'
+                'Remove Employee',
+                'Remove Department'
             ]
         })
         .then((answer) => {
@@ -72,6 +73,9 @@ function start() {
                     break;
                 case 'Remove Employee':
                     removeEmployee();
+                    break;
+                case 'Remove Department':
+                    removeDepartment();
                     break;
             }
         });
@@ -209,6 +213,34 @@ function updateEmployRole() {}
 
 // function updateManager() {}
 
+function removeDepartment() {
+    connection.query('SELECT id, name FROM department', function(err, db) {
+        if (err) throw err;
+        var departmentChoices = db.map((e) => {
+            return {
+                name: e.name,
+                value: e.id
+            };
+        });
+        inquirer
+            .prompt([{
+                name: 'name',
+                type: 'list',
+                message: 'What department would you like to remove?',
+                choices: departmentChoices
+            }])
+            .then((answer) => {
+                connection.query(
+                    'DELETE FROM department WHERE id=?', [answer.name],
+                    function(err, db) {
+                        console.log('removed department' + answer.name);
+                        start();
+                    }
+                );
+            });
+    });
+}
+
 function removeEmployee() {
     connection.query('SELECT first_name, last_name, id FROM employee', function(
         err,
@@ -232,7 +264,7 @@ function removeEmployee() {
                 connection.query(
                     'DELETE FROM employee WHERE id=?', [answer.name],
                     function(err, db) {
-                        console.log('removed employee');
+                        console.log('removed employee' + answer.name);
                         start();
                     }
                 );
