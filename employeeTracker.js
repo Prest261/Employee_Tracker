@@ -138,7 +138,7 @@ function addDepartment() {
 }
 
 function addRole() {
-    connection.query('select * from department', function(error, db) {
+    connection.query('SELECT * FROM department', function(error, db) {
         var depChoices = db.map((e) => {
             return {
                 name: e.name,
@@ -190,17 +190,52 @@ function viewDepart() {
     });
 }
 
-function viewEmpRole() {
+function viewRole() {
     connection.query('SELECT * FROM role', function(err, db) {
         console.table(db);
         start();
     });
 }
 
-function viewRole() {}
+function viewEmpRole() {
+    // need to join the employees first_name & last_name to be shown in the role too
+    connection.query('SELECT * role', function(err, db) {
+        console.table(db);
+        start();
+    });
+}
 
 function updateEmployRole() {}
 
-function updateManager() {}
+// function updateManager() {}
 
-function removeEmployee() {}
+function removeEmployee() {
+    connection.query('SELECT first_name, last_name, id FROM employee', function(
+        err,
+        db
+    ) {
+        if (err) throw err;
+        var employChoices = db.map((e) => {
+            return {
+                name: e.first_name + ' ' + e.last_name,
+                value: e.id
+            };
+        });
+        inquirer
+            .prompt([{
+                name: 'name',
+                type: 'list',
+                message: 'Who is the employee you would like to remove?',
+                choices: employChoices
+            }])
+            .then((answer) => {
+                connection.query(
+                    'DELETE FROM employee WHERE id=?', [answer.name],
+                    function(err, db) {
+                        console.log('removed employee');
+                        start();
+                    }
+                );
+            });
+    });
+}
