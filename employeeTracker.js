@@ -37,7 +37,6 @@ function start() {
                 'View Role',
                 'View all Employees by Role',
                 'Update Employee Role',
-                'Update Employee Manager',
                 'Remove Employee',
                 'Remove Department'
             ]
@@ -181,10 +180,13 @@ function addRole() {
 }
 
 function viewEmployee() {
-    connection.query('SELECT * FROM employee', function(err, db) {
-        console.table(db);
-        start();
-    });
+    connection.query(
+        'SELECT first_name, last_name, role.title, role.salary, department.name FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department ON role.department_id = department.id',
+        function(err, db) {
+            console.table(db);
+            start();
+        }
+    );
 }
 
 function viewDepart() {
@@ -203,15 +205,62 @@ function viewRole() {
 
 function viewEmpRole() {
     // need to join the employees first_name & last_name to be shown in the role too
-    connection.query('SELECT * role', function(err, db) {
-        console.table(db);
-        start();
-    });
+    connection.query(
+        'SELECT first_name, last_name, role.title FROM employee LEFT JOIN role ON employee.role_id = role.id',
+        function(err, db) {
+            console.table(db);
+            start();
+        }
+    );
 }
 
-function updateEmployRole() {}
+function updateEmployRole() {
+    connection.query('SELECT * FROM employee', function(err, db) {
+        if (err) throw err;
 
-// function updateManager() {}
+        var employeeChoices = db.map((e) => {
+            return {
+                name: e.first_name + ' ' + e.last_name,
+                value: e.id
+            };
+        });
+
+        connection.query('SELECT * FROM role', function(err, db) {
+            if (err) throw err;
+
+            var RoleChoices = db.map((e) => {
+                return {
+                    name: e.title,
+                    value: e.id
+                };
+            });
+
+            inquirer
+                .prompt([{
+                        name: 'employee',
+                        type: 'list',
+                        message: 'Which Employee would you like to update?',
+                        choices: employeeChoices
+                    },
+                    {
+                        name: 'role',
+                        type: 'list',
+                        message: 'What is the updated role for the employee?',
+                        choices: RoleChoices
+                    }
+                ])
+                .then(function(answer) {
+                    connection.query(
+                        'UPDATE employee SET role_id=? WHERE id=?', [answer.role, answer.employee],
+                        function(err, db) {
+                            if (err) throw err;
+                            start();
+                        }
+                    );
+                });
+        });
+    });
+}
 
 function removeDepartment() {
     connection.query('SELECT id, name FROM department', function(err, db) {
